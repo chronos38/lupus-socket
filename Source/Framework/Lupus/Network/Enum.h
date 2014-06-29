@@ -65,18 +65,40 @@ namespace Lupus {
     };
 
     enum class SocketShutdown {
-        Receive,
-        Send,
-        Both
+        Receive = LU_SHUTDOWN_READ,
+        Send = LU_SHUTDOWN_WRITE,
+        Both = LU_SHUTDOWN_BOTH
     };
 
-    enum SocketFlags {
+    enum class SocketFlags {
         None = 0,
         OutOfBand = MSG_OOB,
         Peek = MSG_PEEK,
         DontRoute = MSG_DONTROUTE,
         Truncated = MSG_CTRUNC
     };
+
+    inline SocketFlags operator|(SocketFlags lhs, SocketFlags rhs)
+    {
+        return static_cast<SocketFlags>(static_cast<int>(lhs) | static_cast<int>(rhs));
+    }
+
+    inline SocketFlags operator&(SocketFlags lhs, SocketFlags rhs)
+    {
+        return static_cast<SocketFlags>(static_cast<int>(lhs) & static_cast<int>(rhs));
+    }
+
+    inline SocketFlags& operator|=(SocketFlags& lhs, SocketFlags rhs)
+    {
+        lhs = static_cast<SocketFlags>(static_cast<int>(lhs) | static_cast<int>(rhs));
+        return lhs;
+    }
+
+    inline SocketFlags& operator&=(SocketFlags& lhs, SocketFlags rhs)
+    {
+        lhs = static_cast<SocketFlags>(static_cast<int>(lhs) & static_cast<int>(rhs));
+        return lhs;
+    }
 
     enum SocketError {
         // TODO: Werte eintragen

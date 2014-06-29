@@ -28,7 +28,7 @@ namespace Lupus {
         virtual Pointer<Socket> Accept() throw (socket_error);
         virtual void Bind(Pointer<IPEndPoint> localEndPoint) throw(socket_error);
         virtual void Close() throw(socket_error);
-        virtual void Close(U32 timeout) NOEXCEPT;
+        virtual void Close(U32 timeout) throw(socket_error);
         virtual void Connect(Pointer<IPEndPoint> remoteEndPoint) throw(socket_error, null_pointer);
         virtual void Connect(Pointer<IPAddress> address, U16 port) throw(socket_error, null_pointer);
         virtual void Connect(const Vector<Pointer<IPEndPoint>>& endPoints) throw(null_pointer);
@@ -38,23 +38,23 @@ namespace Lupus {
         virtual void Listen(U32 backlog) throw(socket_error);
         virtual PollResult Poll(U32 milliSeconds, SelectMode mode) throw(socket_error);
         virtual S32 Receive(Vector<Byte>& buffer) throw(socket_error);
-        virtual S32 Receive(Vector<Byte>& buffer, U32 offset) throw(socket_error);
-        virtual S32 Receive(Vector<Byte>& buffer, U32 offset, U32 size) throw(socket_error);
-        virtual S32 Receive(Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags) throw(socket_error);
-        virtual S32 Receive(Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, SocketError& errorCode) throw(socket_error);
+        virtual S32 Receive(Vector<Byte>& buffer, U32 offset) throw(socket_error, std::out_of_range);
+        virtual S32 Receive(Vector<Byte>& buffer, U32 offset, U32 size) throw(socket_error, std::out_of_range);
+        virtual S32 Receive(Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags) throw(socket_error, std::out_of_range);
+        virtual S32 Receive(Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, SocketError& errorCode) throw(socket_error, std::out_of_range);
         virtual S32 ReceiveFrom(Vector<Byte>& buffer, Pointer<IPEndPoint>& remoteEndPoint) throw(socket_error);
-        virtual S32 ReceiveFrom(Vector<Byte>& buffer, U32 offset, Pointer<IPEndPoint>& remoteEndPoint) throw(socket_error);
-        virtual S32 ReceiveFrom(Vector<Byte>& buffer, U32 offset, U32 size, Pointer<IPEndPoint>& remoteEndPoint) throw(socket_error);
-        virtual S32 ReceiveFrom(Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, Pointer<IPEndPoint>& remoteEndPoint) throw(socket_error);
+        virtual S32 ReceiveFrom(Vector<Byte>& buffer, U32 offset, Pointer<IPEndPoint>& remoteEndPoint) throw(socket_error, std::out_of_range);
+        virtual S32 ReceiveFrom(Vector<Byte>& buffer, U32 offset, U32 size, Pointer<IPEndPoint>& remoteEndPoint) throw(socket_error, std::out_of_range);
+        virtual S32 ReceiveFrom(Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, Pointer<IPEndPoint>& remoteEndPoint) throw(socket_error, std::out_of_range);
         virtual S32 Send(const Vector<Byte>& buffer) throw(socket_error);
-        virtual S32 Send(const Vector<Byte>& buffer, U32 offset) throw(socket_error);
-        virtual S32 Send(const Vector<Byte>& buffer, U32 offset, U32 size) throw(socket_error);
-        virtual S32 Send(const Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags) throw(socket_error);
-        virtual S32 Send(const Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, SocketError& errorCode) throw(socket_error);
+        virtual S32 Send(const Vector<Byte>& buffer, U32 offset) throw(socket_error, std::out_of_range);
+        virtual S32 Send(const Vector<Byte>& buffer, U32 offset, U32 size) throw(socket_error, std::out_of_range);
+        virtual S32 Send(const Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags) throw(socket_error, std::out_of_range);
+        virtual S32 Send(const Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, SocketError& errorCode) throw(socket_error, std::out_of_range);
         virtual S32 SendTo(const Vector<Byte>& buffer, Pointer<IPEndPoint> remoteEndPoint) throw(socket_error);
-        virtual S32 SendTo(const Vector<Byte>& buffer, U32 offset, Pointer<IPEndPoint> remoteEndPoint) throw(socket_error);
-        virtual S32 SendTo(const Vector<Byte>& buffer, U32 offset, U32 size, Pointer<IPEndPoint> remoteEndPoint) throw(socket_error);
-        virtual S32 SendTo(const Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, Pointer<IPEndPoint> remoteEndPoint) throw(socket_error);
+        virtual S32 SendTo(const Vector<Byte>& buffer, U32 offset, Pointer<IPEndPoint> remoteEndPoint) throw(socket_error, std::out_of_range);
+        virtual S32 SendTo(const Vector<Byte>& buffer, U32 offset, U32 size, Pointer<IPEndPoint> remoteEndPoint) throw(socket_error, std::out_of_range);
+        virtual S32 SendTo(const Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, Pointer<IPEndPoint> remoteEndPoint) throw(socket_error, std::out_of_range);
         virtual void Shutdown(SocketShutdown how) throw(socket_error);
 
         ///////////////////////////////////////////////////////////////////////
@@ -63,9 +63,9 @@ namespace Lupus {
         virtual SocketHandle Handle() const NOEXCEPT;
         virtual bool IsConnected() const NOEXCEPT;
         virtual bool IsBound() const NOEXCEPT;
-        virtual bool IsListening() const NOEXCEPT;
-        virtual AddressFamily Family() const NOEXCEPT;
-        virtual ProtocolType Protocol() const NOEXCEPT;
+        virtual bool IsListening() const throw(socket_error);
+        virtual AddressFamily Family() const throw(socket_error);
+        virtual ProtocolType Protocol() const throw(socket_error);
         virtual SocketType Type() const throw(socket_error);
         virtual U32 Available() const throw(socket_error);
         virtual bool Blocking() const NOEXCEPT;
@@ -88,14 +88,16 @@ namespace Lupus {
 
     private:
 
+        Socket(SocketHandle, AddrStorage);
+
         SocketHandle mHandle = INVALID_SOCKET;
-        AddressFamily mFamily = AddressFamily::Unspecified;
-        ProtocolType mProtocol = ProtocolType::Unspecified;
         S32 mSendTime = 0; // Windows support
         S32 mRecvTime = 0; // Windows support
         bool mBlocking = true;
         Pointer<IPEndPoint> mLocal;
         Pointer<IPEndPoint> mRemote;
+        bool mBound = false;
+        bool mConnected = false;
 
         Pointer<Internal::SocketState> mState;
 

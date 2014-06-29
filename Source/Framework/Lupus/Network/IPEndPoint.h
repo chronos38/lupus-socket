@@ -9,9 +9,6 @@ namespace Lupus {
     class LUPUS_API IPEndPoint : public ReferenceType
     {
     public:
-        //! Standardkonstruktor ist nicht erlaubt.
-        IPEndPoint() = delete;
-
         /*!
          * Erstellt einen IP-Endpunkt mit der angegebenen IPv4 Adresse und
          * bindet diesen an den angebenen Port. Es werden nur IPv4 Adressen
@@ -32,6 +29,13 @@ namespace Lupus {
          * \param[in]   port    Die Portnummer.
          */
         IPEndPoint(Pointer<IPAddress> address, U16 port) throw(null_pointer);
+
+        /*!
+         * Erstellt einen IP-Endpunkt anhand von serialisierten Daten.
+         *
+         * \param[in]   buffer  Serialisierte Daten.
+         */
+        IPEndPoint(const Vector<Byte>& buffer) throw(std::invalid_argument);
         virtual ~IPEndPoint() = default;
 
         /*!
@@ -62,7 +66,18 @@ namespace Lupus {
          */
         virtual void Port(U16 port) NOEXCEPT;
 
+        /*!
+         * Serialisiert die internen Daten und speichert sie in einen 
+         * Byte-Buffer. Der Buffer ist Plattformabhängig, was auch der Grund
+         * ist wieso keine ISerializable implementiert wird.
+         *
+         * \returns Interne Daten in Form eines Byte-Buffers.
+         */
+        virtual Vector<Byte> Serialize() const NOEXCEPT;
+
     private:
+
+        IPEndPoint() = default;
 
         AddrStorage mAddrStorage;
         Pointer<IPAddress> mAddress;

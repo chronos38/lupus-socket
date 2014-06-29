@@ -26,9 +26,6 @@ namespace Lupus {
 			throw socket_error(GetLastSocketErrorString);
 		}
 
-		mFamily = (AddressFamily)family;
-		mProtocol = (ProtocolType)protocol;
-
 		switch (family) {
             case AF_INET:
 			    addrsize = sizeof(AddrIn);
@@ -48,7 +45,7 @@ namespace Lupus {
                     throw socket_error(GetLastSocketErrorString);
                 }
 
-			    mState.reset(new Internal::SocketConnected());
+			    mState.reset(new Internal::SocketConnected(this));
 			    break;
 
             case SocketInformationOption::Bound:
@@ -56,11 +53,11 @@ namespace Lupus {
                     throw socket_error(GetLastSocketErrorString);
                 }
 
-			    mState.reset(new Internal::SocketBound());
+			    mState.reset(new Internal::SocketBound(this));
 			    break;
 
 		    default:
-			    mState.reset(new Internal::SocketClosed());
+			    mState.reset(new Internal::SocketClosed(this));
 			    break;
 		}
 	}
@@ -71,9 +68,7 @@ namespace Lupus {
 			throw socket_error(GetLastSocketErrorString);
 		}
 
-		mFamily = family;
-		mProtocol = protocol;
-		mState.reset(new Internal::SocketClosed());
+		mState.reset(new Internal::SocketClosed(this));
 	}
 
 	Socket::~Socket()
@@ -174,19 +169,19 @@ namespace Lupus {
 		short events = 0;
 
 		switch (mode) {
-		case SelectMode::Read: events |= LU_POLLIN; break;
-		case SelectMode::Write: events |= LU_POLLOUT; break;
-		case SelectMode::OutOfBand: events |= LU_POLLPRI; break;
-		default: break;
+		    case SelectMode::Read: events |= LU_POLLIN; break;
+		    case SelectMode::Write: events |= LU_POLLOUT; break;
+		    case SelectMode::OutOfBand: events |= LU_POLLPRI; break;
+		    default: break;
 		}
 
 		pollfd fd = { mHandle, events, 0 };
 		pollfd fdarray[] = { fd };
 
 		switch (poll(fdarray, 1, (int)milliSeconds)) {
-		case SOCKET_ERROR: throw socket_error(GetLastSocketErrorString);
-		case 0: return PollResult::Timeout;
-		default: return ((fdarray[0].revents & value) == value) ? PollResult::True : PollResult::False;
+		    case SOCKET_ERROR: throw socket_error(GetLastSocketErrorString);
+		    case 0: return PollResult::Timeout;
+		    default: return ((fdarray[0].revents & value) == value) ? PollResult::True : PollResult::False;
 		}
 	}
 
@@ -300,27 +295,33 @@ namespace Lupus {
 
 	bool Socket::IsConnected() const
 	{
-		return mState->IsConnected();
+        return mConnected;
 	}
 
 	bool Socket::IsBound() const
 	{
-		return mState->IsBound();
+        return mBound;
 	}
 
 	bool Socket::IsListening() const
-	{
-		return mState->IsListening();
+    {
+        S32 result, length = 4;
+
+        if (getsockopt(mHandle, SOL_SOCKET, SO_ACCEPTCONN, (char*)&result, (int*)&length) != 0) {
+            throw socket_error(GetLastSocketErrorString);
+        }
+        
+        return (result == 1);
 	}
 
 	AddressFamily Socket::Family() const
 	{
-		return mFamily;
+        return (AddressFamily)Internal::GetSocketDomain(mHandle);
 	}
 	
 	ProtocolType Socket::Protocol() const
 	{
-		return mProtocol;
+        return (ProtocolType)Internal::GetSocketProtocol(mHandle);
 	}
 	
 	SocketType Socket::Type() const
@@ -446,4 +447,26 @@ namespace Lupus {
 	{
 		throw socket_error("Select is not implemented");
 	}
+
+    Socket::Socket(SocketHandle h, AddrStorage a)
+    {
+        mHandle = h;
+
+        switch (a.ss_family) {
+            case AF_INET:
+                mRemote = IPEndPointPtr(new IPEndPoint(*((U32*)std::addressof(((AddrIn*)&a)->sin_addr)), NetworkToHostOrder(((AddrIn*)&a)->sin_port)));
+                break;
+
+            case AF_INET6:
+                mRemote = IPEndPointPtr(new IPEndPoint(
+                    IPAddressPtr(new IPAddress(Vector<Byte>(
+                    (Byte*)&(((AddrIn6*)&a)->sin6_addr),
+                    (Byte*)&(((AddrIn6*)&a)->sin6_addr) + 16))),
+                    NetworkToHostOrder(((AddrIn6*)&a)->sin6_port)));
+                break;
+        }
+
+        mConnected = true;
+        mState = Pointer<Internal::SocketState>(new Internal::SocketConnected(this));
+    }
 }

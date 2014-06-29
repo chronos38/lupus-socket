@@ -17,7 +17,7 @@ namespace Lupus {
         AddrIn* addr;
         AddrIn6* addr6;
 
-        memset(&mAddrStorage, 0, sizeof(mAddrStorage));
+        memset(&mAddrStorage, 0, sizeof(AddrStorage));
 
         switch (address->Family()) {
             case AddressFamily::InterNetwork:
@@ -37,6 +37,16 @@ namespace Lupus {
 
         mAddress = address;
 	}
+
+    IPEndPoint::IPEndPoint(const Vector<Byte>& buffer)
+    {
+        if (buffer.size() != sizeof(AddrStorage)) {
+            throw std::invalid_argument("buffer contains invalid data");
+        }
+
+        memset(&mAddrStorage, 0, sizeof(AddrStorage));
+        memcpy(&mAddrStorage, buffer.data(), sizeof(AddrStorage));
+    }
 
 	AddressFamily IPEndPoint::Family() const
 	{
@@ -58,7 +68,7 @@ namespace Lupus {
         AddrIn* addr;
         AddrIn6* addr6;
 
-        memset(&mAddrStorage, 0, sizeof(mAddrStorage));
+        memset(&mAddrStorage, 0, sizeof(AddrStorage));
 
         switch (address->Family()) {
             case AddressFamily::InterNetwork:
@@ -102,4 +112,9 @@ namespace Lupus {
                 ((AddrIn6*)&mAddrStorage)->sin6_port = HostToNetworkOrder(port);
         }
 	}
+
+    Vector<Byte> IPEndPoint::Serialize() const
+    {
+        return Vector<Byte>((Byte*)&mAddrStorage, (Byte*)&mAddrStorage + sizeof(AddrStorage));
+    }
 }
