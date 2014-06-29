@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Memory">
+      <UniqueIdentifier>{f7a5c93e-eee7-4ecb-8a7a-a5a561dfe9a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Memory\Header">
+      <UniqueIdentifier>{c87b9107-76a2-429d-b4e4-b08be82d0d9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Memory\Source">
+      <UniqueIdentifier>{1c126e86-09fc-47a5-9ea1-146f594ac888}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Network">
+      <UniqueIdentifier>{5e16a94c-f723-4a60-8f1a-9c0bd7cbef68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Network\Header">
+      <UniqueIdentifier>{399682cb-c622-49e0-a798-129718bb2bc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header">
+      <UniqueIdentifier>{242b25d1-3a71-4a6a-ac22-0fd2ebe02e0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{6d5906c2-0fcc-4d35-b80d-fb2ae9d27def}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Network\Source">
+      <UniqueIdentifier>{d762a935-7dce-4707-b523-7b397e65cbdf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Internal">
+      <UniqueIdentifier>{58ac9485-61d2-4b26-9b93-5351835e7036}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Internal\Network">
+      <UniqueIdentifier>{92b5bbfe-327c-438d-aec6-2a4169930f94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Internal\Network\Source">
+      <UniqueIdentifier>{38d46645-b8cc-4b30-b71e-073d6eb3a140}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Internal\Network\Header">
+      <UniqueIdentifier>{53df7354-6fa1-4a0d-b9b9-88ffbce567e3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Lupus\Definitions.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Lupus\Memory\DoubleBufferedAllocator.h">
+      <Filter>Memory\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Lupus\Memory\StackAllocator.h">
+      <Filter>Memory\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Lupus\Network\Enum.h">
+      <Filter>Network\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Lupus\Network\IPAddress.h">
+      <Filter>Network\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Lupus\Network\IPEndPoint.h">
+      <Filter>Network\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Lupus\Network\Socket.h">
+      <Filter>Network\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Lupus\Network\SocketInformation.h">
+      <Filter>Network\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Lupus\Network\Utility.h">
+      <Filter>Network\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Lupus\Network\Definitions.h">
+      <Filter>Network\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Lupus\ISerializable.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Internal\Network\SocketState.h">
+      <Filter>Internal\Network\Header</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Memory\DoubleBufferedAllocator.cpp">
+      <Filter>Memory\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory\StackAllocator.cpp">
+      <Filter>Memory\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Network\IPAddress.cpp">
+      <Filter>Network\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Network\IPEndPoint.cpp">
+      <Filter>Network\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Network\Socket.cpp">
+      <Filter>Network\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Network\Utility.cpp">
+      <Filter>Network\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Internal\Network\SocketState.cpp">
+      <Filter>Internal\Network\Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
