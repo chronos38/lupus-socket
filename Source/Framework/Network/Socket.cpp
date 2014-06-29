@@ -125,11 +125,6 @@ namespace Lupus {
         mState->Connect(this, IPEndPointPtr(new IPEndPoint(IPAddress::Parse(host), port)));
 	}
 
-	void Socket::Disconnect()
-	{
-		mState->Disconnect(this);
-	}
-
     SocketInformation Socket::DuplicateAndClose()
     {
         return mState->DuplicateAndClose(this);
@@ -140,26 +135,16 @@ namespace Lupus {
 		mState->Listen(this, backlog);
 	}
 
-	PollResult Socket::Poll(U32 milliSeconds, SelectMode mode)
+    SocketPollFlags Socket::Poll(U32 milliSeconds, SocketPollFlags mode)
 	{
-		short value = (short)mode;
-		short events = 0;
+        pollfd fd = { mHandle, (short)mode, 0 };
+        pollfd fdarray[] = { fd };
 
-		switch (mode) {
-		    case SelectMode::Read: events |= LU_POLLIN; break;
-		    case SelectMode::Write: events |= LU_POLLOUT; break;
-		    case SelectMode::OutOfBand: events |= LU_POLLPRI; break;
-		    default: break;
-		}
-
-		pollfd fd = { mHandle, events, 0 };
-		pollfd fdarray[] = { fd };
-
-		switch (poll(fdarray, 1, (int)milliSeconds)) {
-		    case SOCKET_ERROR: throw socket_error(GetLastSocketErrorString);
-		    case 0: return PollResult::Timeout;
-		    default: return ((fdarray[0].revents & value) == value) ? PollResult::True : PollResult::False;
-		}
+        switch (poll(fdarray, 1, (int)milliSeconds)) {
+            case SOCKET_ERROR: throw socket_error(GetLastSocketErrorString);
+            case 0: return SocketPollFlags::Timeout;
+            default: return (SocketPollFlags)fdarray[0].revents;
+        }
 	}
 
 	S32 Socket::Receive(Vector<Byte>& buffer)

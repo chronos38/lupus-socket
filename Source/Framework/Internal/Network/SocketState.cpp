@@ -51,11 +51,6 @@ namespace Lupus {
 		{
 			throw socket_error("Socket is not in an valid state for Connect");
 		}
-		
-		void SocketState::Disconnect(Socket* socket)
-		{
-			throw socket_error("Socket has no connection");
-		}
 
         SocketInformation SocketState::DuplicateAndClose(Socket* socket)
         {
@@ -256,11 +251,6 @@ namespace Lupus {
                 throw socket_error(GetLastSocketErrorString);
             }
         }
-
-        void SocketConnected::Disconnect(Socket* socket)
-        {
-            ChangeState(socket, Pointer<SocketState>(new SocketDisconnected(socket)));
-        }
         
         S32 SocketConnected::Receive(Socket* socket, Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, SocketError& errorCode)
         {
@@ -308,23 +298,6 @@ namespace Lupus {
         }
         
         void SocketConnected::Shutdown(Socket* socket, SocketShutdown how)
-        {
-            if (shutdown(socket->Handle(), (int)how) != 0) {
-                throw socket_error(GetLastSocketErrorString);
-            }
-        }
-
-        SocketDisconnected::SocketDisconnected(Socket* s)
-        {
-            SetConnected(s, false);
-        }
-
-        void SocketDisconnected::Connect(Socket* socket, Pointer<IPEndPoint> remoteEndPoint)
-        {
-            ChangeState(socket, Pointer<SocketState>(new SocketConnected(socket)));
-        }
-
-        void SocketDisconnected::Shutdown(Socket* socket, SocketShutdown how)
         {
             if (shutdown(socket->Handle(), (int)how) != 0) {
                 throw socket_error(GetLastSocketErrorString);

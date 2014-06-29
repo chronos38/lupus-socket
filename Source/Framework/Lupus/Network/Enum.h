@@ -49,20 +49,37 @@ namespace Lupus {
         IPX = AF_IPX
     };
 
-    enum class SelectMode {
+    enum class SocketPollFlags : short {
         Read = LU_POLLIN,
         Write = LU_POLLOUT,
-        Error = POLLERR,
         OutOfBand = LU_POLLPRI,
+        Error = POLLERR,
         HungUp = POLLHUP,
-        Invalid = POLLNVAL
+        Invalid = POLLNVAL,
+        Timeout
     };
 
-    enum class PollResult {
-        Timeout = -1,
-        False = 0,
-        True = 1
-    };
+    inline SocketPollFlags operator|(SocketPollFlags lhs, SocketPollFlags rhs)
+    {
+        return static_cast<SocketPollFlags>(static_cast<short>(lhs) | static_cast<short>(rhs));
+    }
+
+    inline SocketPollFlags operator&(SocketPollFlags lhs, SocketPollFlags rhs)
+    {
+        return static_cast<SocketPollFlags>(static_cast<short>(lhs)& static_cast<short>(rhs));
+    }
+
+    inline SocketPollFlags& operator|=(SocketPollFlags& lhs, SocketPollFlags rhs)
+    {
+        lhs = static_cast<SocketPollFlags>(static_cast<short>(lhs) | static_cast<short>(rhs));
+        return lhs;
+    }
+
+    inline SocketPollFlags& operator&=(SocketPollFlags& lhs, SocketPollFlags rhs)
+    {
+        lhs = static_cast<SocketPollFlags>(static_cast<short>(lhs)& static_cast<short>(rhs));
+        return lhs;
+    }
 
     enum class SocketShutdown {
         Receive = LU_SHUTDOWN_READ,

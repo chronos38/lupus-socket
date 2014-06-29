@@ -19,7 +19,6 @@ namespace Lupus {
             virtual void Close(Socket* socket) throw(socket_error);
             virtual void Close(Socket* socket, U32 timeout) throw(socket_error);
             virtual void Connect(Socket* socket, Pointer<IPEndPoint> remoteEndPoint) throw(socket_error, null_pointer);
-            virtual void Disconnect(Socket* socket) throw(socket_error);
             virtual SocketInformation DuplicateAndClose(Socket* socket) throw(null_pointer, socket_error);
             virtual void Listen(Socket* socket, U32 backlog) throw(socket_error);
             virtual S32 Receive(Socket* socket, Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, SocketError& errorCode) throw(socket_error, std::out_of_range);
@@ -70,23 +69,11 @@ namespace Lupus {
             virtual ~SocketConnected() = default;
 
             virtual void Connect(Socket* socket, Pointer<IPEndPoint> remoteEndPoint) throw(socket_error, null_pointer);
-            virtual void Disconnect(Socket* socket) throw(socket_error) override;
             virtual S32 Receive(Socket* socket, Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, SocketError& errorCode) throw(socket_error, std::out_of_range) override;
             virtual S32 ReceiveFrom(Socket* socket, Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, Pointer<IPEndPoint>& remoteEndPoint) throw(socket_error, std::out_of_range) override;
             virtual S32 Send(Socket* socket, const Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, SocketError& errorCode) throw(socket_error, std::out_of_range) override;
             virtual S32 SendTo(Socket* socket, const Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, Pointer<IPEndPoint> remoteEndPoint) throw(socket_error, std::out_of_range) override;
             virtual void Shutdown(Socket* socket, SocketShutdown how) throw(socket_error) override;
-        };
-
-        class SocketDisconnected : public SocketState
-        {
-        public:
-            SocketDisconnected(Socket*);
-            virtual ~SocketDisconnected() = default;
-
-            virtual void Connect(Socket* socket, Pointer<IPEndPoint> remoteEndPoint) throw(socket_error, null_pointer);
-            virtual void Shutdown(Socket* socket, SocketShutdown how) throw(socket_error);
-
         };
 
         class SocketReady : public SocketState
