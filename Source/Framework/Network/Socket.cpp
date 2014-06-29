@@ -57,7 +57,7 @@ namespace Lupus {
 			    break;
 
 		    default:
-			    mState.reset(new Internal::SocketClosed(this));
+                mState.reset(new Internal::SocketReady(this));
 			    break;
 		}
 	}
@@ -68,7 +68,7 @@ namespace Lupus {
 			throw socket_error(GetLastSocketErrorString);
 		}
 
-		mState.reset(new Internal::SocketClosed(this));
+        mState.reset(new Internal::SocketReady(this));
 	}
 
 	Socket::~Socket()
@@ -125,37 +125,14 @@ namespace Lupus {
         mState->Connect(this, IPEndPointPtr(new IPEndPoint(IPAddress::Parse(host), port)));
 	}
 
-	void Socket::Disconnect(bool reuseSocket)
+	void Socket::Disconnect()
 	{
-		mState->Disconnect(this, reuseSocket);
+		mState->Disconnect(this);
 	}
 
     SocketInformation Socket::DuplicateAndClose()
     {
-        S32 family = (S32)Family();
-        S32 type = (S32)Type();
-        S32 protocol = (S32)Protocol();
-        SocketInformation info = {
-            SocketInformationOption::None,
-            Vector<Byte>()
-        };
-
-        info.ProtocolInformation.insert(std::end(info.ProtocolInformation), (Byte*)&family, (Byte*)&family + 4);
-        info.ProtocolInformation.insert(std::end(info.ProtocolInformation), (Byte*)&type, (Byte*)&type + 4);
-        info.ProtocolInformation.insert(std::end(info.ProtocolInformation), (Byte*)&protocol, (Byte*)&protocol + 4);
-
-        if (IsConnected()) {
-            Vector<Byte> bytes = mLocal->Address()->AddressBytes();
-            info.Options = SocketInformationOption::Connected;
-            info.ProtocolInformation.insert(std::end(info.ProtocolInformation), std::begin(bytes), std::end(bytes));
-        } else if (IsBound()) {
-            Vector<Byte> bytes = mLocal->Address()->AddressBytes();
-            info.Options = SocketInformationOption::Bound;
-            info.ProtocolInformation.insert(std::end(info.ProtocolInformation), std::begin(bytes), std::end(bytes));
-        }
-
-        Close();
-        return info;
+        return mState->DuplicateAndClose(this);
     }
 
 	void Socket::Listen(U32 backlog)
@@ -359,25 +336,17 @@ namespace Lupus {
 		if (ioctlsocket(mHandle, FIONBIO, &(arg)) != 0) {
 			throw socket_error(GetLastSocketErrorString);
 		}
-	}
+    }
 
-	Pointer<IPEndPoint> Socket::LocalEndPoint() const
-	{
-		if (!mLocal) {
-			throw socket_error("Local end point is not set");
-		}
+    Pointer<IPEndPoint> Socket::LocalEndPoint() const
+    {
+        return mLocal;
+    }
 
-		return mLocal;
-	}
-	
-	Pointer<IPEndPoint> Socket::RemoteEndPoint() const
-	{
-		if (!mRemote) {
-			throw socket_error("Remote end point is not set");
-		}
-
-		return mRemote;
-	}
+    Pointer<IPEndPoint> Socket::RemoteEndPoint() const
+    {
+        return mRemote;
+    }
 	
 	S32 Socket::SendBuffer() const
 	{
@@ -447,26 +416,4 @@ namespace Lupus {
 	{
 		throw socket_error("Select is not implemented");
 	}
-
-    Socket::Socket(SocketHandle h, AddrStorage a)
-    {
-        mHandle = h;
-
-        switch (a.ss_family) {
-            case AF_INET:
-                mRemote = IPEndPointPtr(new IPEndPoint(*((U32*)std::addressof(((AddrIn*)&a)->sin_addr)), NetworkToHostOrder(((AddrIn*)&a)->sin_port)));
-                break;
-
-            case AF_INET6:
-                mRemote = IPEndPointPtr(new IPEndPoint(
-                    IPAddressPtr(new IPAddress(Vector<Byte>(
-                    (Byte*)&(((AddrIn6*)&a)->sin6_addr),
-                    (Byte*)&(((AddrIn6*)&a)->sin6_addr) + 16))),
-                    NetworkToHostOrder(((AddrIn6*)&a)->sin6_port)));
-                break;
-        }
-
-        mConnected = true;
-        mState = Pointer<Internal::SocketState>(new Internal::SocketConnected(this));
-    }
 }

@@ -2,7 +2,9 @@
 
 #include <Lupus/Definitions.h>
 
-DefineError(socket_error)
+namespace Lupus {
+    DefineError(socket_error)
+}
 
 #ifdef _MSC_VER
 
@@ -101,8 +103,6 @@ namespace Lupus {
             int domain = 0;
             socklen_t size = sizeof(int);
 
-            memset(&info, 0, sizeof(WSAPROTOCOL_INFO));
-
             if (getsockopt(h, SOL_SOCKET, SO_DOMAIN, &domain, &size) != 0) {
                 throw socket_error(GetLastSocketErrorString);
             }
@@ -115,8 +115,6 @@ namespace Lupus {
         {
             int protocol = 0;
             socklen_t size = sizeof(int);
-
-            memset(&info, 0, sizeof(WSAPROTOCOL_INFO));
 
             if (getsockopt(h, SOL_SOCKET, SO_PROTOCOL, &protocol, &size) != 0) {
                 throw socket_error(GetLastSocketErrorString);

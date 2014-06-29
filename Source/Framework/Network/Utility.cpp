@@ -132,23 +132,11 @@ namespace Lupus {
 		}
 
 		for (it = begin; it; it = it->ai_next) {
-            IPEndPoint* endPoint = nullptr;
+            AddrStorage storage;
 
-            switch (it->ai_family) {
-                case AF_INET:
-                    endPoint = new IPEndPoint(*((U32*)std::addressof(((AddrIn*)it->ai_addr)->sin_addr)), NetworkToHostOrder(((AddrIn*)it->ai_addr)->sin_port));
-                    break;
-
-                case AF_INET6:
-                    endPoint = new IPEndPoint(
-                        IPAddressPtr(new IPAddress(Vector<Byte>(
-                            (Byte*)&(((AddrIn6*)it->ai_addr)->sin6_addr), 
-                            (Byte*)&(((AddrIn6*)it->ai_addr)->sin6_addr) + 16))), 
-                        NetworkToHostOrder(((AddrIn6*)it->ai_addr)->sin6_port));
-                    break;
-            }
-			
-            addresses.push_back(IPEndPointPtr(endPoint));
+            memset(&storage, 0, sizeof(AddrStorage));
+            memcpy(&storage, it->ai_addr, it->ai_addrlen);
+            addresses.push_back(IPEndPointPtr(new IPEndPoint(Vector<Byte>((Byte*)&storage, (Byte*)&storage + sizeof(AddrStorage)))));
 		}
 
 		freeaddrinfo(begin);

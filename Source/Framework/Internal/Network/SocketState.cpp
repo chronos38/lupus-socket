@@ -2,6 +2,7 @@
 #include <Internal/Network/SocketState.h>
 #include <Lupus/Network/IPAddress.h>
 #include <Lupus/Network/IPEndPoint.h>
+#include <Lupus/Network/SocketInformation.h>
 
 namespace Lupus {
 	namespace Internal {
@@ -29,7 +30,7 @@ namespace Lupus {
             socket->mRemote = IPEndPointPtr(nullptr);
             socket->mBound = false;
             socket->mConnected = false;
-            ChangeState(socket, Pointer<SocketState>(new SocketClosed(socket)));
+            ChangeState(socket, Pointer<SocketState>(new SocketClosed()));
 		}
 
 		void SocketState::Close(Socket* socket, U32 timeout)
@@ -51,10 +52,49 @@ namespace Lupus {
 			throw socket_error("Socket is not in an valid state for Connect");
 		}
 		
-		void SocketState::Disconnect(Socket* socket, bool reuseSocket)
+		void SocketState::Disconnect(Socket* socket)
 		{
 			throw socket_error("Socket has no connection");
 		}
+
+        SocketInformation SocketState::DuplicateAndClose(Socket* socket)
+        {
+            IPEndPointPtr point;
+            S32 family = (S32)socket->Family();
+            S32 type = (S32)socket->Type();
+            S32 protocol = (S32)socket->Protocol();
+            SocketInformation info = {
+                SocketInformationOption::None,
+                Vector<Byte>()
+            };
+
+            if (!socket->mLocal && !socket->mRemote) {
+                throw null_pointer("Socket endpoint points to NULL");
+            } else if (!socket->mLocal) {
+                point = socket->mRemote;
+            } else {
+                point = socket->mLocal;
+            }
+
+            info.ProtocolInformation.insert(std::end(info.ProtocolInformation), (Byte*)&family, (Byte*)&family + 4);
+            info.ProtocolInformation.insert(std::end(info.ProtocolInformation), (Byte*)&type, (Byte*)&type + 4);
+            info.ProtocolInformation.insert(std::end(info.ProtocolInformation), (Byte*)&protocol, (Byte*)&protocol + 4);
+
+            if (socket->IsBound()) {
+                Vector<Byte> bytes = point->Address()->AddressBytes();
+                info.Options = SocketInformationOption::Bound;
+                info.ProtocolInformation.insert(std::end(info.ProtocolInformation), std::begin(bytes), std::end(bytes));
+            } else if (socket->IsConnected()) {
+                Vector<Byte> bytes = socket->mRemote->Address()->AddressBytes();
+                info.Options = SocketInformationOption::Connected;
+                info.ProtocolInformation.insert(std::end(info.ProtocolInformation), std::begin(bytes), std::end(bytes));
+            } else {
+                info.ProtocolInformation.resize(info.ProtocolInformation.size() + sizeof(AddrStorage));
+            }
+
+            Close(socket);
+            return info;
+        }
 		
 		void SocketState::Listen(Socket* socket, U32 backlog)
 		{
@@ -88,32 +128,37 @@ namespace Lupus {
 
         Pointer<Socket> SocketState::CreateSocket(SocketHandle h, AddrStorage s)
         {
-            return Pointer<Socket>(new Socket(h, s));
+            Socket* sock = new Socket();
+            sock->mHandle = h;
+            sock->mConnected = true;
+            sock->mRemote = IPEndPointPtr(new IPEndPoint(Vector<Byte>((Byte*)&s, (Byte*)&s + sizeof(AddrStorage))));
+            sock->mState = Pointer<SocketState>(new SocketConnected(sock));
+            return SocketPtr(sock);
         }
 
 		void SocketState::ChangeState(Socket* socket, Pointer<SocketState> state)
 		{
             socket->mState = state;
-		}
-
-		void SocketState::SetRemoteEndPoint(Socket* socket, Pointer<IPEndPoint> remote)
-		{
-            socket->mRemote = remote;
-		}
-		
-		void SocketState::SetLocalEndPoint(Socket* socket, Pointer<IPEndPoint> local)
-		{
-            socket->mLocal = local;
         }
 
-        Pointer<IPEndPoint> SocketState::GetRemoteEndPoint(Socket* socket) const
+        void SocketState::SetLocalEndPoint(Socket* socket, Pointer<IPEndPoint> remote)
         {
-            return socket->mRemote;
+            socket->mLocal = remote;
+        }
+
+        void SocketState::SetRemoteEndPoint(Socket* socket, Pointer<IPEndPoint> remote)
+        {
+            socket->mRemote = remote;
         }
 
         Pointer<IPEndPoint> SocketState::GetLocalEndPoint(Socket* socket) const
         {
             return socket->mLocal;
+        }
+
+        Pointer<IPEndPoint> SocketState::GetRemoteEndPoint(Socket* socket) const
+        {
+            return socket->mRemote;
         }
 
         void SocketState::SetConnected(Socket* socket, bool value)
@@ -152,7 +197,7 @@ namespace Lupus {
                 throw socket_error(GetLastSocketErrorString);
             }
 
-            ChangeState(socket, Pointer<SocketState>(new SocketConnected(socket, remoteEndPoint)));
+            ChangeState(socket, Pointer<SocketState>(new SocketConnected(socket)));
         }
 
         void SocketBound::Listen(Socket* socket, U32 backlog)
@@ -196,7 +241,23 @@ namespace Lupus {
             SetRemoteEndPoint(s, p);
         }
 
-        void SocketConnected::Disconnect(Socket* socket, bool reuseSocket)
+        void SocketConnected::Connect(Socket* socket, Pointer<IPEndPoint> remoteEndPoint)
+        {
+            if (!remoteEndPoint) {
+                throw null_pointer("remoteEndPoint points to NULL");
+            }
+
+            AddrStorage storage;
+
+            memset(&storage, 0, sizeof(AddrStorage));
+            memcpy(&storage, remoteEndPoint->Serialize().data(), sizeof(AddrStorage));
+
+            if (connect(socket->Handle(), (Addr*)&storage, sizeof(AddrStorage)) != 0) {
+                throw socket_error(GetLastSocketErrorString);
+            }
+        }
+
+        void SocketConnected::Disconnect(Socket* socket)
         {
             ChangeState(socket, Pointer<SocketState>(new SocketDisconnected(socket)));
         }
@@ -270,20 +331,42 @@ namespace Lupus {
             }
         }
 
-        SocketClosed::SocketClosed(Socket* s)
+        SocketReady::SocketReady(Socket* s)
         {
             SetBound(s, false);
             SetConnected(s, false);
         }
 
-        void SocketClosed::Bind(Socket* socket, Pointer<IPEndPoint> localEndPoint) throw(socket_error)
+        void SocketReady::Bind(Socket* socket, Pointer<IPEndPoint> localEndPoint) throw(socket_error)
         {
+            int yes = 1;
+            Vector<Byte> address = localEndPoint->Serialize();
+
+            if (setsockopt(socket->Handle(), SOL_SOCKET, SO_REUSEADDR, (const char*)yes, sizeof(int)) != 0) {
+                throw socket_error(GetLastSocketErrorString);
+            }
+
             ChangeState(socket, Pointer<SocketState>(new SocketBound(socket, localEndPoint)));
         }
 
-        void SocketClosed::Connect(Socket* socket, Pointer<IPEndPoint> remoteEndPoint) throw(socket_error, null_pointer)
+        void SocketReady::Connect(Socket* socket, Pointer<IPEndPoint> remoteEndPoint) throw(socket_error, null_pointer)
         {
             ChangeState(socket, Pointer<SocketState>(new SocketConnected(socket, remoteEndPoint)));
+        }
+
+        void SocketClosed::Close(Socket* socket)
+        {
+            throw socket_error("Socket is not in an valid state for Close");
+        }
+
+        void SocketClosed::Close(Socket* socket, U32 timeout)
+        {
+            throw socket_error("Socket is not in an valid state for Close");
+        }
+        
+        SocketInformation SocketClosed::DuplicateAndClose(Socket* socket)
+        {
+            throw socket_error("Socket is not in an valid state for DuplicateAndClose");
         }
     }
 }

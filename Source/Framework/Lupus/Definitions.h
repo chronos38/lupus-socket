@@ -128,8 +128,8 @@ namespace Lupus {
     static const U32 KiB = 1024; //!< Kibibyte
     static const U32 MiB = 1024 * 1024; //!< Mebibyte
     static const U32 GiB = 1024 * 1024 * 1024; //!< Gibibyte
+
+    // Global errors
+
+    DefineError(null_pointer)
 }
-
-// Global errors
-
-DefineError(null_pointer)

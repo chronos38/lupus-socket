@@ -19,7 +19,8 @@ namespace Lupus {
             virtual void Close(Socket* socket) throw(socket_error);
             virtual void Close(Socket* socket, U32 timeout) throw(socket_error);
             virtual void Connect(Socket* socket, Pointer<IPEndPoint> remoteEndPoint) throw(socket_error, null_pointer);
-            virtual void Disconnect(Socket* socket, bool reuseSocket) throw(socket_error);
+            virtual void Disconnect(Socket* socket) throw(socket_error);
+            virtual SocketInformation DuplicateAndClose(Socket* socket) throw(null_pointer, socket_error);
             virtual void Listen(Socket* socket, U32 backlog) throw(socket_error);
             virtual S32 Receive(Socket* socket, Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, SocketError& errorCode) throw(socket_error, std::out_of_range);
             virtual S32 ReceiveFrom(Socket* socket, Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, Pointer<IPEndPoint>& remoteEndPoint) throw(socket_error, std::out_of_range);
@@ -32,10 +33,10 @@ namespace Lupus {
             Pointer<Socket> CreateSocket(SocketHandle, AddrStorage) NOEXCEPT;
 
             void ChangeState(Socket* socket, Pointer<SocketState> state) NOEXCEPT;
-            void SetRemoteEndPoint(Socket* socket, Pointer<IPEndPoint>) NOEXCEPT;
             void SetLocalEndPoint(Socket* socket, Pointer<IPEndPoint>) NOEXCEPT;
-            Pointer<IPEndPoint> GetRemoteEndPoint(Socket* socket) const NOEXCEPT;
+            void SetRemoteEndPoint(Socket* socket, Pointer<IPEndPoint>) NOEXCEPT;
             Pointer<IPEndPoint> GetLocalEndPoint(Socket* socket) const NOEXCEPT;
+            Pointer<IPEndPoint> GetRemoteEndPoint(Socket* socket) const NOEXCEPT;
 
             void SetConnected(Socket*, bool) NOEXCEPT;
             void SetBound(Socket*, bool) NOEXCEPT;
@@ -68,7 +69,8 @@ namespace Lupus {
             SocketConnected(Socket*, Pointer<IPEndPoint>);
             virtual ~SocketConnected() = default;
 
-            virtual void Disconnect(Socket* socket, bool reuseSocket) throw(socket_error) override;
+            virtual void Connect(Socket* socket, Pointer<IPEndPoint> remoteEndPoint) throw(socket_error, null_pointer);
+            virtual void Disconnect(Socket* socket) throw(socket_error) override;
             virtual S32 Receive(Socket* socket, Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, SocketError& errorCode) throw(socket_error, std::out_of_range) override;
             virtual S32 ReceiveFrom(Socket* socket, Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, Pointer<IPEndPoint>& remoteEndPoint) throw(socket_error, std::out_of_range) override;
             virtual S32 Send(Socket* socket, const Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags, SocketError& errorCode) throw(socket_error, std::out_of_range) override;
@@ -87,14 +89,25 @@ namespace Lupus {
 
         };
 
-        class SocketClosed : public SocketState
+        class SocketReady : public SocketState
         {
         public:
-            SocketClosed(Socket*);
-            virtual ~SocketClosed() = default;
+            SocketReady(Socket*);
+            virtual ~SocketReady() = default;
 
             virtual void Bind(Socket* socket, Pointer<IPEndPoint> localEndPoint) throw(socket_error) override;
             virtual void Connect(Socket* socket, Pointer<IPEndPoint> remoteEndPoint) throw(socket_error, null_pointer) override;
+        };
+
+        class SocketClosed : public SocketState
+        {
+        public:
+            SocketClosed() = default;
+            virtual ~SocketClosed() = default;
+
+            virtual void Close(Socket* socket) throw(socket_error) override;
+            virtual void Close(Socket* socket, U32 timeout) throw(socket_error) override;
+            virtual SocketInformation DuplicateAndClose(Socket* socket) throw(socket_error) override;
         };
     }
 }

@@ -17,7 +17,6 @@ namespace Lupus {
         ///////////////////////////////////////////////////////////////////////
         /// Constructors
         ///////////////////////////////////////////////////////////////////////
-        Socket() = delete;
         Socket(const SocketInformation& socketInformation) throw(std::invalid_argument, socket_error);
         Socket(AddressFamily family, SocketType type, ProtocolType protocol) throw(socket_error);
         virtual ~Socket();
@@ -33,8 +32,8 @@ namespace Lupus {
         virtual void Connect(Pointer<IPAddress> address, U16 port) throw(socket_error, null_pointer);
         virtual void Connect(const Vector<Pointer<IPEndPoint>>& endPoints) throw(null_pointer);
         virtual void Connect(const String& host, U16 port) throw(socket_error, std::invalid_argument);
-        virtual void Disconnect(bool reuseSocket) throw(socket_error);
-        virtual SocketInformation DuplicateAndClose() throw(socket_error);
+        virtual void Disconnect() throw(socket_error);
+        virtual SocketInformation DuplicateAndClose() throw(null_pointer, socket_error);
         virtual void Listen(U32 backlog) throw(socket_error);
         virtual PollResult Poll(U32 milliSeconds, SelectMode mode) throw(socket_error);
         virtual S32 Receive(Vector<Byte>& buffer) throw(socket_error);
@@ -70,8 +69,8 @@ namespace Lupus {
         virtual U32 Available() const throw(socket_error);
         virtual bool Blocking() const NOEXCEPT;
         virtual void Blocking(bool) throw(socket_error);
-        virtual Pointer<IPEndPoint> LocalEndPoint() const throw(socket_error);
-        virtual Pointer<IPEndPoint> RemoteEndPoint() const throw(socket_error);
+        virtual Pointer<IPEndPoint> LocalEndPoint() const NOEXCEPT;
+        virtual Pointer<IPEndPoint> RemoteEndPoint() const NOEXCEPT;
         virtual S32 SendBuffer() const throw(socket_error);
         virtual void SendBuffer(S32) throw(socket_error);
         virtual S32 ReceiveBuffer() const throw(socket_error);
@@ -88,7 +87,7 @@ namespace Lupus {
 
     private:
 
-        Socket(SocketHandle, AddrStorage);
+        Socket() = default;
 
         SocketHandle mHandle = INVALID_SOCKET;
         S32 mSendTime = 0; // Windows support
