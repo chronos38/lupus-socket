@@ -5,17 +5,17 @@
 namespace Lupus {
     //! Sockettyp
     enum class SocketType {
-        Unspecified = 0,
-        SeqPacket = SOCK_SEQPACKET,
-        Stream = SOCK_STREAM,
-        Datagram = SOCK_DGRAM,
-        Rdm = SOCK_RDM,
-        Raw = SOCK_RAW
+        Unspecified = 0, //!< Typ ist nicht spezifiziert und von daher variabl.
+        SeqPacket = SOCK_SEQPACKET, //!< Squenzpaket-Stream Socket
+        Stream = SOCK_STREAM, //!< Streaming Socket (TCP).
+        Datagram = SOCK_DGRAM, //!< Datagram Socket (UDP).
+        Rdm = SOCK_RDM, //!< reliably-delivered message.
+        Raw = SOCK_RAW //!< Socket verwendet normale NAT Pakete.
     };
 
     //! Netzwerkprotokoll
     enum class ProtocolType {
-        Unspecified = 0,
+        Unspecified = 0, //!< Protokoll ist nicht spezifiziert und von daher variabl.
         IP = IPPROTO_IP,
         IPv4 = IPPROTO_IPV4,
         IPv6 = IPPROTO_IPV6,
@@ -41,18 +41,18 @@ namespace Lupus {
 
     //! Adressart
     enum class AddressFamily {
-        Unspecified = AF_UNSPEC,
-        InterNetwork = AF_INET,
-        InterNetworkV6 = AF_INET6,
+        Unspecified = AF_UNSPEC, //!< Domäne ist nicht spezifiziert und von daher variabl.
+        InterNetwork = AF_INET, //!< IPv4
+        InterNetworkV6 = AF_INET6, //!< IPv6
         AppleTalk = AF_APPLETALK,
         UNIX = AF_UNIX,
         IPX = AF_IPX
     };
 
     enum class SocketPollFlags : short {
-        Read = LU_POLLIN,
-        Write = LU_POLLOUT,
-        OutOfBand = LU_POLLPRI,
+        Read = LU_POLLIN, //!< Überprüft ob Daten zum lesen vorhanden sind.
+        Write = LU_POLLOUT, //!< Überprüft ob Daten zum schreiben vorhanden sind.
+        OutOfBand = LU_POLLPRI, //!< Überprüft ob Out-Of-Band Daten vorhanden sind.
         Error = POLLERR,
         HungUp = POLLHUP,
         Invalid = POLLNVAL,
@@ -82,9 +82,9 @@ namespace Lupus {
     }
 
     enum class SocketShutdown {
-        Receive = LU_SHUTDOWN_READ,
-        Send = LU_SHUTDOWN_WRITE,
-        Both = LU_SHUTDOWN_BOTH
+        Receive = LU_SHUTDOWN_READ, //!< Schließt die Leseverbindung.
+        Send = LU_SHUTDOWN_WRITE, //!< Schließt die Schreibverbindung.
+        Both = LU_SHUTDOWN_BOTH //!< Schließt sowohl Lese- als auch Schreibverbindung.
     };
 
     enum class SocketFlags {

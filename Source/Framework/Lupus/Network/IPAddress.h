@@ -14,7 +14,7 @@ namespace Lupus {
 
         /*!
          * Erstellt eine neue IP-Adresse anhand der übergenenen IPv4 Adresse.
-         * Das Format der Ganzzahl ist 0xSSTTUUVV -> sss.ttt.uuu.vvv und sie
+         * Das Format der Ganzzahl ist 0xSSTTUUVV -\> sss.ttt.uuu.vvv und sie
          * wird in das entsrechende Netzwerkformat konvertiert.
          *
          * \param[in]   ipv4    Ganzzahl die eine IPv4 Adresse beinhaltet.

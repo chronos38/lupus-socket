@@ -34,8 +34,11 @@ namespace Lupus {
             const U32 bytes = sizeof(T) * count;
             const U32 align = std::alignment_of<T>::value;
 
-            if (std::align(align, bytes, mHead, mSize)) {
-                T* result = (T*)mHead;
+            void* ptr = (void*)mHead;
+
+            if (std::align(align, bytes, ptr, mSize)) {
+                T* result = (T*)ptr;
+                mHead = (Byte*)ptr;
                 mHead += bytes;
                 mSize -= bytes;
                 return result;

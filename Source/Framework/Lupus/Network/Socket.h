@@ -276,7 +276,7 @@ namespace Lupus {
         virtual S32 Send(const Vector<Byte>& buffer, U32 offset, U32 size, SocketFlags socketFlags) throw(socket_error, std::out_of_range);
 
         /*!
-         * Schreibt Daten zu dem Verbundenen Endpunkt. Wenn der Socket
+         * Schreibt Daten zu den verbundenen Endpunkt. Wenn der Socket
          * blockiert, dann wartet diese Methode solange bis die Daten gesendet
          * wurden. Andernfalls wird ein Fehlercode im errorCode Argument
          * gespeichert.
@@ -344,33 +344,126 @@ namespace Lupus {
          */
         virtual void Shutdown(SocketShutdown how) throw(socket_error);
 
-        ///////////////////////////////////////////////////////////////////////
-        /// Modifiers
-        ///////////////////////////////////////////////////////////////////////
+        /*!
+         * \returns Den nativen Socket-Handle
+         */
         virtual SocketHandle Handle() const NOEXCEPT;
+
+        /*!
+         * Überprüft ob für diesen Socket eine Verbindung besteht.
+         *
+         * \returns TRUE wenn der Socket verbunden ist, ansonsten FALSE.
+         */
         virtual bool IsConnected() const NOEXCEPT;
+
+        /*!
+         * Überprüft ob dieser Socket an eine Adresse gebunden ist.
+         *
+         * \returns TRUE wenn der Socket gebunden ist, ansonsten FALSE.
+         */
         virtual bool IsBound() const NOEXCEPT;
+
+        /*!
+         * Überprüft ob der Socket auf eingehende Verbindungen wartet.
+         *
+         * \returns TRUE wenn der Socket auf Verbindungen wartet, ansonsten
+         *          FALSE.
+         */
         virtual bool IsListening() const throw(socket_error);
+
+        /*!
+         * \returns Die Domäne des Sockets.
+         */
         virtual AddressFamily Family() const throw(socket_error);
+
+        /*!
+         * \returns Das Protokoll des Sockets.
+         */
         virtual ProtocolType Protocol() const throw(socket_error);
+
+        /*!
+         * \returns Den Typ des Sockets.
+         */
         virtual SocketType Type() const throw(socket_error);
+
+        /*!
+         * Überprüft ob es Daten zum lesen gibt und retouniert die Anzahl an
+         * Bytes.
+         *
+         * \returns Die Byteanzahl zum lesen.
+         */
         virtual U32 Available() const throw(socket_error);
+
+        /*!
+         * Überprüft ob der Socket auf Anfragen wartet. Standardwert ist TRUE.
+         *
+         * \returns TRUE wenn der Socket blockt, ansonsten FALSE.
+         */
         virtual bool Blocking() const NOEXCEPT;
+        
+        /*!
+         * Entscheidet ob der Socket blockt oder nicht. TRUE wenn der Socket
+         * blocken soll, ansonsten FALSE. Standardwert ist TRUE.
+         */
         virtual void Blocking(bool) throw(socket_error);
+
+        /*!
+         * Retouniert den lokalen Endpunkt an den der Socket gebunden ist, oder
+         * einen Nullzeiger wenn der Socket keine spezifische lokale Verbindung
+         * besitzt.
+         */
         virtual Pointer<IPEndPoint> LocalEndPoint() const NOEXCEPT;
+
+        /*!
+         * Retouniert den Remote-Endpunkt mit dem der Socket verbunden ist,
+         * oder einen Nullzeiger wenn der Socket keine Remote-Verbindung
+         * besitzt.
+         */
         virtual Pointer<IPEndPoint> RemoteEndPoint() const NOEXCEPT;
+
+        /*!
+         * \returns Die Größe des Schreib-Buffers.
+         */
         virtual S32 SendBuffer() const throw(socket_error);
+
+        /*!
+         * Setzt die Größe des Schreib-Buffers.
+         */
         virtual void SendBuffer(S32) throw(socket_error);
+
+        /*!
+         * \returns Die Größe des Lese-Buffers.
+         */
         virtual S32 ReceiveBuffer() const throw(socket_error);
+
+        /*!
+         * Setzt die Größe des Lese-Buffers.
+         */
         virtual void ReceiveBuffer(S32) throw(socket_error);
+
+        /*!
+         * Retouniert den Timeout für das blocken von Schreibbefehlen.
+         */
         virtual S32 SendTimeout() const NOEXCEPT;
+
+        /*!
+         * Setzt den Timeout für das blocken von Schreibbefehlen.
+         */
         virtual void SendTimeout(S32) throw(socket_error);
+
+        /*!
+         * Retouniert den Timeout für das blocken von Lesebefehlen.
+         */
         virtual S32 ReceiveTimeout() const NOEXCEPT;
+
+        /*!
+         * Setzt den Timeout für das blocken von Lesebefehlen.
+         */
         virtual void ReceiveTimeout(S32) throw(socket_error);
 
-        ///////////////////////////////////////////////////////////////////////
-        /// Static Methods
-        ///////////////////////////////////////////////////////////////////////
+        /*!
+         * \warning Noch nicht implementiert.
+         */
         static void Select(const Vector<Pointer<Socket>>& checkRead, const Vector<Pointer<Socket>>& checkWrite, const Vector<Pointer<Socket>>& checkError, U32 microSeconds) throw(socket_error);
 
     private:

@@ -15,7 +15,7 @@ namespace Lupus {
         /*!
          * Erstellt einen IP-Endpunkt mit der angegebenen IPv4 Adresse und
          * bindet diesen an den angebenen Port. Es werden nur IPv4 Adressen
-         * unterstützt und diese muss sich in der Form 0xSSTTUUVV ->
+         * unterstützt und diese muss sich in der Form 0xSSTTUUVV -\>
          * sss.ttt.uuu.vvv befinden.
          *
          * \param[in]   address Eine valide IPv4 Adresse.
