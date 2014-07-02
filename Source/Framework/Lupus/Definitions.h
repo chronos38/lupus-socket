@@ -46,6 +46,7 @@
 #include <thread>
 #include <mutex>
 #include <exception>
+#include <initializer_list>
 
 // Exception
 

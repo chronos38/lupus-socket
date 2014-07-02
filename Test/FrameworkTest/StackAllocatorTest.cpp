@@ -11,12 +11,12 @@ namespace FrameworkTest
 	{
 	public:
 		
-		TEST_METHOD(StackAllocatorConstructor)
+		TEST_METHOD(StackAllocator_Constructor)
 		{
             StackAllocator(32 * KiB);
 		}
 
-        TEST_METHOD(StackAllocatorAllocate)
+        TEST_METHOD(StackAllocator_Allocate)
         {
             StackAllocator allocator(32 * KiB);
             Assert::IsNotNull(allocator.Allocate<U8>(32));
@@ -25,7 +25,7 @@ namespace FrameworkTest
             Assert::IsNotNull(allocator.Allocate<U64>(32));
         }
 
-        TEST_METHOD(StackAllocatorFreeToMarker)
+        TEST_METHOD(StackAllocator_FreeToMarker)
         {
             StackAllocator allocator(32 * KiB);
             UIntPtr marker = allocator.GetMarker();
@@ -41,7 +41,7 @@ namespace FrameworkTest
             });
         }
 
-        TEST_METHOD(StackAllocatorClear)
+        TEST_METHOD(StackAllocator_Clear)
         {
             StackAllocator allocator(32 * KiB);
             UIntPtr m1 = allocator.GetMarker();

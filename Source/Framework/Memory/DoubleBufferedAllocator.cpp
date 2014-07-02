@@ -12,10 +12,12 @@ namespace Lupus {
         {
             if (mStackAllocator[0]) {
                 delete mStackAllocator[0];
+                mStackAllocator[0] = nullptr;
             }
 
             if (mStackAllocator[1]) {
                 delete mStackAllocator[1];
+                mStackAllocator[1] = nullptr;
             }
         }
 

@@ -11,30 +11,31 @@ namespace FrameworkTest
     {
     public:
 
-        TEST_METHOD(DoubleBufferedAllocatorConstructor)
+        TEST_METHOD(DoubleBufferedAllocator_Constructor)
         {
             DoubleBufferAllocator(32 * KiB);
         }
 
-        TEST_METHOD(DoubleBufferedAllocatorDestructor)
+        TEST_METHOD(DoubleBufferedAllocator_Destructor)
         {
             DoubleBufferAllocator* dba = new DoubleBufferAllocator(32 * KiB);
+            dba->~DoubleBufferAllocator();
             delete dba;
         }
 
-        TEST_METHOD(DoubleBufferedAllocatorAllocate)
+        TEST_METHOD(DoubleBufferedAllocator_Allocate)
         {
             DoubleBufferAllocator dba(32 * KiB);
             Assert::IsNotNull(dba.Allocate<S32>(32));
         }
 
-        TEST_METHOD(DoubleBufferedAllocatorSwap)
+        TEST_METHOD(DoubleBufferedAllocator_Swap)
         {
             DoubleBufferAllocator dba(32 * KiB);
             dba.Swap();
         }
 
-        TEST_METHOD(DoubleBufferedAllocatorClear)
+        TEST_METHOD(DoubleBufferedAllocator_Clear)
         {
             DoubleBufferAllocator dba(32 * KiB);
             dba.Clear();

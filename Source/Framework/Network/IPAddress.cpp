@@ -25,6 +25,11 @@ namespace Lupus {
         mScopeId = scopeid;
 	}
 
+    IPAddress::IPAddress(std::initializer_list<Byte> ilist) :
+        IPAddress(Vector<Byte>(ilist))
+    {
+    }
+
 	Vector<Byte> IPAddress::Bytes() const 
 	{
         return mAddress;
@@ -136,11 +141,16 @@ namespace Lupus {
         address->mAddress.clear();
 
         if (inet_pton(AF_INET, ipString.c_str(), &(addr.sin_addr)) == 1) {
-            address = new IPAddress(*((U32*)&addr.sin_addr));
+            address = new IPAddress(NetworkToHostOrder(*((U32*)&addr.sin_addr)));
         } else if (inet_pton(AF_INET6, ipString.c_str(), &(addr6.sin6_addr)) == 1) {
             Byte* begin = (Byte*)&addr6.sin6_addr;
             address = new IPAddress(0);
-            address->mAddress.insert(std::end(address->mAddress), begin, begin + 16);
+            address->mAddress.clear();
+            address->mAddress.reserve(16);
+
+            for (S32 i = 0; i < 16; i++) { // Konvertiere von Netzwerk zu Host.
+                address->mAddress.push_back(*(begin++));
+            }
         } else {
             throw std::invalid_argument("Not a valid IP address presentation");
         }

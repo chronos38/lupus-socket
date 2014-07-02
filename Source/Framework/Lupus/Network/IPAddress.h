@@ -40,6 +40,11 @@ namespace Lupus {
          * \param[in]   scopeid Der Scope Identifier der IPv6 Adresse.
          */
         IPAddress(const Vector<Byte>& ipv6, U32 scopeid) throw(std::length_error);
+
+        /*!
+         * \sa IPAddress::IPAddress(const Vector<Byte>&, U32)
+         */
+        IPAddress(std::initializer_list<Byte> ilist);
         virtual ~IPAddress() = default;
 
         /*!
