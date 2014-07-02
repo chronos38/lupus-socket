@@ -57,19 +57,11 @@ namespace Lupus {
 	
 	U32 IPAddress::ScopeId() const 
 	{
-        if (mFamily != AddressFamily::InterNetworkV6) {
-            throw socket_error("Address is not of type IPv6");
-        }
-
         return mScopeId;
 	}
 	
 	void IPAddress::ScopeId(U32 value) 
     {
-        if (mFamily != AddressFamily::InterNetworkV6) {
-            throw socket_error("Address is not of type IPv6");
-        }
-
         mScopeId = value;
 	}
 

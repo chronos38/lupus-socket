@@ -44,7 +44,7 @@ namespace Lupus {
         /*!
          * \sa IPAddress::IPAddress(const Vector<Byte>&, U32)
          */
-        IPAddress(std::initializer_list<Byte> ilist);
+        IPAddress(std::initializer_list<Byte> ilist) throw(std::length_error);
         virtual ~IPAddress() = default;
 
         /*!
