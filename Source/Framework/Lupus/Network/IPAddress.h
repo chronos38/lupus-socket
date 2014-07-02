@@ -9,8 +9,6 @@ namespace Lupus {
     class LUPUS_API IPAddress : public ReferenceType
     {
     public:
-        //! Standardkonstruktor ist nicht erlaubt.
-        IPAddress() = delete;
 
         /*!
          * Erstellt eine neue IP-Adresse anhand der übergenenen IPv4 Adresse.
@@ -19,7 +17,7 @@ namespace Lupus {
          *
          * \param[in]   ipv4    Ganzzahl die eine IPv4 Adresse beinhaltet.
          */
-        IPAddress(U32 ipv4) NOEXCEPT;
+        explicit IPAddress(U32 ipv4) NOEXCEPT;
 
         /*!
          * Dieser Konstruktor ruft IPAddress(address, 0) auf.
@@ -49,7 +47,7 @@ namespace Lupus {
          *
          * \returns Byte-Buffer der serialisierten Adresse.
          */
-        virtual Vector<Byte> AddressBytes() const NOEXCEPT;
+        virtual Vector<Byte> Bytes() const NOEXCEPT;
 
         /*!
          * \returns Die Adressfamilie der IP-Adresse.
@@ -84,7 +82,12 @@ namespace Lupus {
         virtual void ScopeId(U32 value) throw(socket_error);
 
         /*!
-         * \warning Methode ist noch nicht implementiert.
+         * \returns Das Präsentationsformat der IP-Adresse.
+         */
+        virtual String ToString() const;
+
+        /*!
+         * \returns TRUE wenn die IP-Adresse eine Loopback Adresse ist.
          */
         static bool IsLoopback(Pointer<IPAddress> address) NOEXCEPT;
 
@@ -126,9 +129,12 @@ namespace Lupus {
 
     private:
 
+        //! Standardkonstruktor ist nicht erlaubt.
+        IPAddress() = delete;
+
         AddressFamily mFamily;
         Vector<Byte> mAddress;
-        U32 mScopeId;
+        U32 mScopeId = 0;
     };
 
     typedef Pointer<IPAddress> IPAddressPtr;

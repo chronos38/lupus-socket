@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <Lupus/Definitions.h>
+#include <Lupus/Memory/StackAllocator.h>
 
 namespace Lupus {
     class StackAllocator;
@@ -9,11 +10,10 @@ namespace Lupus {
     class LUPUS_API DoubleBufferAllocator : public ReferenceType
     {
     public:
-        //! Standardkonstruktor ist nicht erlaubt.
-        DoubleBufferAllocator() = delete;
+
         /*! 
-         * Erstellt einen neuen DoubleBuffer. Da es zwei Stacks gibt,
-         * hat jede Instanz die Größe singleStackSize * 2.
+         * Erstellt einen neuen DoubleBuffer. Die übergebene Größe gilt für
+         * einen Stack. Die Gesamtgröße mach somit singlStackSize * 2 aus.
          *
          * @param[in]   singleStackSize Die Bytegröße pro Stack.
          */
@@ -49,6 +49,9 @@ namespace Lupus {
         }
 
     private:
+
+        //! Standardkonstruktor ist nicht erlaubt.
+        DoubleBufferAllocator() = delete;
 
         U32 mCurrent = 0;
         StackAllocator* mStackAllocator[2];

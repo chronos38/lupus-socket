@@ -9,8 +9,6 @@ namespace Lupus {
     class LUPUS_API IPEndPoint : public ReferenceType
     {
     public:
-        //! Standardkonstruktor ist nicht erlaubt.
-        IPEndPoint() = delete;
         
         /*!
          * Erstellt einen IP-Endpunkt mit der angegebenen IPv4 Adresse und
@@ -79,6 +77,9 @@ namespace Lupus {
         virtual Vector<Byte> Serialize() const NOEXCEPT;
 
     private:
+
+        //! Standardkonstruktor ist nicht erlaubt.
+        IPEndPoint() = delete;
 
         AddrStorage mAddrStorage;
         Pointer<IPAddress> mAddress;

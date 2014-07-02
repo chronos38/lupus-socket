@@ -5,6 +5,7 @@ namespace Lupus {
 	IPAddress::IPAddress(U32 ipv4) :
         mFamily(AddressFamily::InterNetwork)
 	{
+        ipv4 = HostToNetworkOrder(ipv4);
         mAddress.insert(std::end(mAddress), (Byte*)&ipv4, (Byte*)&ipv4 + 4);
 	}
 
@@ -21,9 +22,10 @@ namespace Lupus {
         }
 
         mAddress = ipv6;
+        mScopeId = scopeid;
 	}
 
-	Vector<Byte> IPAddress::AddressBytes() const 
+	Vector<Byte> IPAddress::Bytes() const 
 	{
         return mAddress;
 	}
@@ -66,14 +68,39 @@ namespace Lupus {
         mScopeId = value;
 	}
 
+    String IPAddress::ToString() const
+    {
+        in_addr addr;
+        in6_addr addr6;
+        char str[INET6_ADDRSTRLEN];
+
+        memset(&addr, 0, sizeof(in_addr));
+        memset(&addr6, 0, sizeof(in6_addr));
+        memset(str, 0, INET6_ADDRSTRLEN);
+
+        switch (Family()) {
+            case AddressFamily::InterNetwork:
+                memcpy(&addr, Bytes().data(), 4);
+                inet_ntop(AF_INET, &addr, str, INET6_ADDRSTRLEN);
+                break;
+
+            case AddressFamily::InterNetworkV6:
+                memcpy(&addr6, Bytes().data(), 16);
+                inet_ntop(AF_INET6, &addr6, str, INET6_ADDRSTRLEN);
+                break;
+        }
+
+        return str;
+    }
+
 	bool IPAddress::IsLoopback(IPAddressPtr address) 
 	{
-        Vector<Byte> addressBytes = address->AddressBytes();
+        Vector<Byte> addressBytes = address->Bytes();
         Vector<Byte> comparer;
 
         switch (address->Family()) {
             case AddressFamily::InterNetwork:
-                comparer = IPAddress::Loopback->AddressBytes();
+                comparer = IPAddress::Loopback->Bytes();
 
                 for (size_t i = 0; i < comparer.size(); i++) {
                     if (addressBytes[i] != comparer[i]) {
@@ -84,7 +111,7 @@ namespace Lupus {
                 break;
 
             case AddressFamily::InterNetworkV6:
-                comparer = IPAddress::IPv6Loopback->AddressBytes();
+                comparer = IPAddress::IPv6Loopback->Bytes();
 
                 for (size_t i = 0; i < comparer.size(); i++) {
                     if (addressBytes[i] != comparer[i]) {
@@ -93,23 +120,38 @@ namespace Lupus {
                 }
 
                 break;
-
-            default:
-                return false;
         }
 
         return true;
 	}
 	
 	IPAddressPtr IPAddress::Parse(const String& ipString) 
-	{
-		return PresentationToNetwork(ipString);
+    {
+        IPAddress* address = new IPAddress(0);
+        AddrIn addr;
+        AddrIn6 addr6;
+
+        memset(&addr, 0, sizeof(AddrIn));
+        memset(&addr6, 0, sizeof(AddrIn6));
+        address->mAddress.clear();
+
+        if (inet_pton(AF_INET, ipString.c_str(), &(addr.sin_addr)) == 1) {
+            address = new IPAddress(*((U32*)&addr.sin_addr));
+        } else if (inet_pton(AF_INET6, ipString.c_str(), &(addr6.sin6_addr)) == 1) {
+            Byte* begin = (Byte*)&addr6.sin6_addr;
+            address = new IPAddress(0);
+            address->mAddress.insert(std::end(address->mAddress), begin, begin + 16);
+        } else {
+            throw std::invalid_argument("Not a valid IP address presentation");
+        }
+
+        return Pointer<IPAddress>(address);
 	}
 	
 	bool IPAddress::TryParse(const String& ipString, IPAddressPtr& address) 
 	{
 		try {
-			address = PresentationToNetwork(ipString);
+			address = IPAddress::Parse(ipString);
 		} catch (std::invalid_argument&) {
 			return false;
 		}

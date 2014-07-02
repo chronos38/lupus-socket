@@ -8,8 +8,7 @@ namespace Lupus {
     class LUPUS_API StackAllocator : public ReferenceType
     {
     public:
-        //! Standardkonstruktor ist nicht erlaubt.
-        StackAllocator() = delete;
+
         /*!
          * Erstellt einen neuen Stack mit der angegebenen Bytegröße.
          *
@@ -77,6 +76,9 @@ namespace Lupus {
         virtual void Clear() NOEXCEPT;
 
     private:
+
+        //! Standardkonstruktor ist nicht erlaubt.
+        StackAllocator() = delete;
 
         Byte* mBlock;
         Byte* mHead;

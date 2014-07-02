@@ -50,20 +50,6 @@ namespace Lupus {
     LUPUS_API U64 NetworkToHostOrder(U64 network) NOEXCEPT;
 
     /*!
-     * Konvertiert eine IP-Adresse in ihre gleichwertige Zeichenkette.
-     *
-     * \returns Die Präsentation der Adresse.
-     */
-    LUPUS_API String NetworkToPresentation(Pointer<IPAddress> address) throw(null_pointer);
-
-    /*!
-     * Konvertiert eine Zeichenkette in ihre gleichwertige IP-Adresse.
-     *
-     * \returns Die Adresse der Präsentation.
-     */
-    LUPUS_API Pointer<IPAddress> PresentationToNetwork(const String& string) throw(std::invalid_argument);
-
-    /*!
      * Diese Funktion ruft GetAddressInformation(node, service, 
      * AddressFamily::Unspecified, SocketType::Unspecified, 
      * ProtocolType::Unspecified) auf.

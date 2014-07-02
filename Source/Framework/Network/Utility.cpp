@@ -34,56 +34,6 @@ namespace Lupus {
 		return ntohll(network);
 	}
 
-	String NetworkToPresentation(Pointer<IPAddress> address)
-	{
-        if (!address) {
-            throw null_pointer("Address points to NULL");
-        }
-
-        in_addr addr;
-        in6_addr addr6;
-		char str[INET6_ADDRSTRLEN];
-
-        memset(&addr, 0, sizeof(in_addr));
-        memset(&addr6, 0, sizeof(in6_addr));
-        memset(str, 0, INET6_ADDRSTRLEN);
-
-		switch (address->Family()) {
-            case AddressFamily::InterNetwork:
-                memcpy(&addr, address->AddressBytes().data(), 4);
-                inet_ntop(AF_INET, &addr, str, INET6_ADDRSTRLEN);
-		        break;
-
-            case AddressFamily::InterNetworkV6:
-                memcpy(&addr6, address->AddressBytes().data(), 16);
-			    inet_ntop(AF_INET6, &addr6, str, INET6_ADDRSTRLEN);
-			    break;
-		}
-
-		return str;
-	}
-
-	Pointer<IPAddress> PresentationToNetwork(const String& string)
-	{
-        Pointer<IPAddress> address;
-		AddrIn addr;
-		AddrIn6 addr6;
-
-		memset(&addr, 0, sizeof(AddrIn));
-		memset(&addr6, 0, sizeof(AddrIn6));
-
-		if (inet_pton(AF_INET, string.c_str(), &(addr.sin_addr)) == 1) {
-            address.reset(new IPAddress(*((U32*)&addr.sin_addr)));
-		} else if (inet_pton(AF_INET6, string.c_str(), &(addr6.sin6_addr)) == 1) {
-            Byte* begin = (Byte*)&addr6.sin6_addr;
-            address.reset(new IPAddress(Vector<Byte>(begin, begin + 16)));
-		} else {
-			throw std::invalid_argument("Not a valid IP address presentation");
-		}
-
-		return address;
-	}
-
     Vector<Pointer<IPEndPoint>> GetAddressInformation(const String& node, const String& service)
 	{
 		return GetAddressInformation(node, service, AddressFamily::Unspecified, SocketType::Unspecified, ProtocolType::Unspecified);

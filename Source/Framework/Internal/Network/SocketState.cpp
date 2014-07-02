@@ -76,11 +76,11 @@ namespace Lupus {
             info.ProtocolInformation.insert(std::end(info.ProtocolInformation), (Byte*)&protocol, (Byte*)&protocol + 4);
 
             if (socket->IsBound()) {
-                Vector<Byte> bytes = point->Address()->AddressBytes();
+                Vector<Byte> bytes = point->Address()->Bytes();
                 info.Options = SocketInformationOption::Bound;
                 info.ProtocolInformation.insert(std::end(info.ProtocolInformation), std::begin(bytes), std::end(bytes));
             } else if (socket->IsConnected()) {
-                Vector<Byte> bytes = socket->mRemote->Address()->AddressBytes();
+                Vector<Byte> bytes = socket->mRemote->Address()->Bytes();
                 info.Options = SocketInformationOption::Connected;
                 info.ProtocolInformation.insert(std::end(info.ProtocolInformation), std::begin(bytes), std::end(bytes));
             } else {

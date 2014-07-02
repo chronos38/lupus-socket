@@ -24,14 +24,14 @@ namespace Lupus {
                 addr = (AddrIn*)&mAddrStorage;
                 addr->sin_family = AF_INET;
                 addr->sin_port = HostToNetworkOrder(port);
-                memcpy(&addr->sin_addr, address->AddressBytes().data(), 4);
+                memcpy(&addr->sin_addr, address->Bytes().data(), 4);
                 break;
 
             case AddressFamily::InterNetworkV6:
                 addr6 = (AddrIn6*)&mAddrStorage;
                 addr6->sin6_family = AF_INET;
                 addr6->sin6_port = HostToNetworkOrder(port);
-                memcpy(&addr6->sin6_addr, address->AddressBytes().data(), 16);
+                memcpy(&addr6->sin6_addr, address->Bytes().data(), 16);
                 break;
         }
 
@@ -75,14 +75,14 @@ namespace Lupus {
                 addr = (AddrIn*)&mAddrStorage;
                 addr->sin_family = AF_INET;
                 addr->sin_port = HostToNetworkOrder(port);
-                memcpy(&addr->sin_addr, address->AddressBytes().data(), 4);
+                memcpy(&addr->sin_addr, address->Bytes().data(), 4);
                 break;
 
             case AddressFamily::InterNetworkV6:
                 addr6 = (AddrIn6*)&mAddrStorage;
                 addr6->sin6_family = AF_INET;
                 addr6->sin6_port = HostToNetworkOrder(port);
-                memcpy(&addr6->sin6_addr, address->AddressBytes().data(), 16);
+                memcpy(&addr6->sin6_addr, address->Bytes().data(), 16);
                 break;
         }
 
