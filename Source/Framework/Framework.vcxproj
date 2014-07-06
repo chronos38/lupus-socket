@@ -35,8 +35,10 @@
     <ClInclude Include="Lupus\Network\Enum.h" />
     <ClInclude Include="Lupus\Network\IPAddress.h" />
     <ClInclude Include="Lupus\Network\IPEndPoint.h" />
+    <ClInclude Include="Lupus\Network\NetworkStream.h" />
     <ClInclude Include="Lupus\Network\Socket.h" />
     <ClInclude Include="Lupus\Network\SocketInformation.h" />
+    <ClInclude Include="Lupus\Network\TcpClient.h" />
     <ClInclude Include="Lupus\Network\Utility.h" />
     <ClInclude Include="Lupus\ISerializable.h" />
   </ItemGroup>

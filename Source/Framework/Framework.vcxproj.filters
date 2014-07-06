@@ -79,6 +79,12 @@
     <ClInclude Include="Internal\Network\SocketState.h">
       <Filter>Internal\Network\Header</Filter>
     </ClInclude>
+    <ClInclude Include="Lupus\Network\NetworkStream.h">
+      <Filter>Network\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Lupus\Network\TcpClient.h">
+      <Filter>Network\Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Memory\DoubleBufferedAllocator.cpp">
